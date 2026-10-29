@@ -6,6 +6,8 @@ Creado por: Noir Perceval (Daniel Chable)
 GitHub: https://github.com/Noirperceval
 
 Fondo animado interactivo y elegante para COSMIC Desktop.
+- Vista previa instantánea al hacer clic en cualquier tarjeta.
+- Botón de confirmación para fijar o guardar la selección.
 - Respeta los colores y tema nativo del sistema.
 - Asistente inteligente de dependencias para Arch, Fedora, Ubuntu, Debian, Pop!_OS, CachyOS, etc.
 """
@@ -21,7 +23,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 APP_NAME = "Cosmic Wallpaper"
 AUTHOR_NAME = "Noir Perceval (Daniel Chable)"
 GITHUB_URL = "https://github.com/Noirperceval"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 
 CACHE_DIR = Path.home() / ".cache" / "cosmic-wallpaper" / "thumbnails"
 CONFIG_FILE = Path.home() / ".config" / "cosmic-wallpaper" / "config.json"
@@ -46,7 +48,6 @@ def detect_distro():
 
     distro_family = info["id"] + " " + info["id_like"]
 
-    # Determinar gestor de paquetes
     if any(k in distro_family for k in ["arch", "cachyos", "manjaro", "endeavouros"]):
         info["pkg_manager"] = "pacman"
         info["install_cmd"] = "sudo pacman -S --needed --noconfirm"
@@ -77,10 +78,6 @@ def detect_distro():
 
 
 def check_and_prompt_dependencies(parent_widget=None, force_test=False):
-    """
-    Verifica si faltan dependencias y le ofrece al usuario instalarlas.
-    Si force_test=True, simula que faltan paquetes para comprobar la ventana y el asistente.
-    """
     distro = detect_distro()
     missing_bins = []
     needed_pkgs = []
@@ -94,7 +91,7 @@ def check_and_prompt_dependencies(parent_widget=None, force_test=False):
         needed_pkgs.append(distro["ffmpeg_pkg"])
 
     if not missing_bins:
-        return True  # Todo perfecto
+        return True
 
     msg = (
         f"<h3>¡Hola! Detectamos que estás usando {distro['name']}</h3>"
@@ -150,7 +147,6 @@ def check_and_prompt_dependencies(parent_widget=None, force_test=False):
 
 
 def get_thumbnail(video_path: Path) -> Path:
-    """Genera miniatura usando ffmpeg de forma ultrarrápida."""
     thumb_name = f"{video_path.stem}_{int(os.path.getmtime(video_path))}.jpg"
     thumb_path = CACHE_DIR / thumb_name
     if not thumb_path.exists() and shutil.which("ffmpeg"):
@@ -171,14 +167,45 @@ def get_thumbnail(video_path: Path) -> Path:
 
 
 def kill_all_instances():
-    """Detiene cualquier mpvpaper activo."""
     subprocess.run(["killall", "-9", "mpvpaper"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def launch_wallpaper_process(selected_list: list):
+    """Lanza mpvpaper con la lista de videos seleccionada de forma suave."""
+    if not selected_list:
+        kill_all_instances()
+        return
+
+    kill_all_instances()
+
+    if len(selected_list) == 1:
+        vid = selected_list[0]
+        cmd = [
+            "mpvpaper",
+            "-o", "no-audio loop-file=inf",
+            "*",
+            str(vid),
+        ]
+        subprocess.Popen(cmd)
+    else:
+        playlist_path = Path("/tmp/cosmic_wallpaper_playlist.txt")
+        with open(playlist_path, "w", encoding="utf-8") as f:
+            for v in selected_list:
+                f.write(f"{v}\n")
+
+        mpv_opts = "no-audio prefetch-playlist=yes keep-open=yes loop-playlist=inf"
+        cmd = [
+            "mpvpaper",
+            "-o", mpv_opts,
+            "*",
+            str(playlist_path),
+        ]
+        subprocess.Popen(cmd)
+
+
 class VideoCard(QtWidgets.QFrame):
-    """Tarjeta visual con miniatura que se adapta al tema del sistema."""
-    clicked = QtCore.Signal(Path)
-    toggled = QtCore.Signal(Path, bool)
+    card_clicked = QtCore.Signal(Path)
+    checkbox_toggled = QtCore.Signal(Path, bool)
 
     def __init__(self, video_path: Path, parent=None):
         super().__init__(parent)
@@ -225,12 +252,13 @@ class VideoCard(QtWidgets.QFrame):
 
     def _on_check_changed(self, state):
         is_checked = (state == QtCore.Qt.Checked.value or state == 2)
-        self.toggled.emit(self.video_path, is_checked)
+        self.checkbox_toggled.emit(self.video_path, is_checked)
 
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.LeftButton:
-            self.check.setChecked(not self.check.isChecked())
-            self.clicked.emit(self.video_path)
+            # Si se hace clic en la tarjeta (fuera del checkbox directo), emitimos card_clicked
+            # para ponerlo inmediatamente en vivo como vista previa
+            self.card_clicked.emit(self.video_path)
         super().mousePressEvent(event)
 
 
@@ -248,15 +276,18 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
             self.current_folder = Path.home() / "Vídeos"
             self.current_folder.mkdir(parents=True, exist_ok=True)
 
-        self.selected_videos = set()
+        # La selección confirmada / guardada
+        self.confirmed_videos = set(
+            Path(p) for p in self.config.get("selected", []) if Path(p).exists()
+        )
+        # La selección activa actual (lo que el usuario está probando)
+        self.active_selection = set(self.confirmed_videos)
         self.cards = []
 
         self.init_ui()
         self.init_tray()
         
-        # Verificar dependencias (normal o modo prueba)
         check_and_prompt_dependencies(self, force_test=test_deps)
-        
         self.scan_folder()
 
     def load_config(self) -> dict:
@@ -270,7 +301,7 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
 
     def save_config(self):
         self.config["folder"] = str(self.current_folder)
-        self.config["selected"] = [str(p) for p in self.selected_videos]
+        self.config["selected"] = [str(p) for p in self.confirmed_videos]
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(self.config, f, indent=2)
 
@@ -281,7 +312,7 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
         main_layout.setContentsMargins(18, 18, 18, 18)
         main_layout.setSpacing(12)
 
-        # Barra superior con título y botones de carpeta
+        # Barra superior
         top_bar = QtWidgets.QHBoxLayout()
         title_box = QtWidgets.QVBoxLayout()
 
@@ -298,20 +329,17 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
 
         top_bar.addStretch()
 
-        # Botón Probar Dependencias
         self.btn_test_deps = QtWidgets.QPushButton("🔍 Probar Asistente")
         self.btn_test_deps.setToolTip("Verifica y muestra el asistente de dependencias para nuevos usuarios")
         self.btn_test_deps.setCursor(QtCore.Qt.PointingHandCursor)
         self.btn_test_deps.clicked.connect(lambda: check_and_prompt_dependencies(self, force_test=True))
         top_bar.addWidget(self.btn_test_deps)
 
-        # Botón Seleccionar Carpeta
         self.btn_folder = QtWidgets.QPushButton("📁 Cambiar carpeta")
         self.btn_folder.setCursor(QtCore.Qt.PointingHandCursor)
         self.btn_folder.clicked.connect(self.select_folder)
         top_bar.addWidget(self.btn_folder)
 
-        # Botón Refrescar
         self.btn_refresh = QtWidgets.QPushButton("🔄 Recargar")
         self.btn_refresh.setCursor(QtCore.Qt.PointingHandCursor)
         self.btn_refresh.clicked.connect(self.scan_folder)
@@ -319,7 +347,6 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
 
         main_layout.addLayout(top_bar)
 
-        # Separador visual nativo
         sep = QtWidgets.QFrame()
         sep.setFrameShape(QtWidgets.QFrame.HLine)
         sep.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -349,9 +376,9 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
         credits_bar.addStretch()
         main_layout.addLayout(credits_bar)
 
-        # Barra Inferior de Acción
+        # Barra Inferior de Acción y Confirmación
         bottom_bar = QtWidgets.QHBoxLayout()
-        self.status_lbl = QtWidgets.QLabel("Selecciona los videos que desees poner de fondo")
+        self.status_lbl = QtWidgets.QLabel("Haz clic en cualquier video para verlo de fondo al instante.")
         bottom_bar.addWidget(self.status_lbl)
 
         bottom_bar.addStretch()
@@ -361,16 +388,17 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
         self.btn_stop.clicked.connect(self.stop_wallpaper)
         bottom_bar.addWidget(self.btn_stop)
 
-        self.btn_apply = QtWidgets.QPushButton("✔ Aplicar Fondo")
-        self.btn_apply.setDefault(True)
-        self.btn_apply.setCursor(QtCore.Qt.PointingHandCursor)
-        self.btn_apply.clicked.connect(self.apply_wallpaper)
-        bottom_bar.addWidget(self.btn_apply)
+        # Botón Confirmar Selección
+        self.btn_confirm = QtWidgets.QPushButton("💾 Confirmar Selección")
+        self.btn_confirm.setToolTip("Guarda esta selección para que sea tu fondo definitivo permanente")
+        self.btn_confirm.setDefault(True)
+        self.btn_confirm.setCursor(QtCore.Qt.PointingHandCursor)
+        self.btn_confirm.clicked.connect(self.confirm_and_save)
+        bottom_bar.addWidget(self.btn_confirm)
 
         main_layout.addLayout(bottom_bar)
 
     def init_tray(self):
-        """Bandeja del sistema (System Tray) para acceso rápido."""
         self.tray = QtWidgets.QSystemTrayIcon(self)
         icon = self.style().standardIcon(QtWidgets.QStyle.SP_MediaPlay)
         self.tray.setIcon(icon)
@@ -450,76 +478,93 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
             return
 
         cols = 4
-        prev_selected = set(self.config.get("selected", []))
-
         for idx, vid in enumerate(videos):
             row = idx // cols
             col = idx % cols
             card = VideoCard(vid, self.scroll_content)
-            card.toggled.connect(self.on_card_toggled)
+            card.card_clicked.connect(self.on_card_single_clicked)
+            card.checkbox_toggled.connect(self.on_card_checkbox_toggled)
 
-            if str(vid) in prev_selected:
+            # Si ya estaba entre los confirmados, marcar casilla
+            if vid in self.confirmed_videos:
+                card.check.blockSignals(True)
                 card.check.setChecked(True)
+                card.check.blockSignals(False)
 
             self.grid.addWidget(card, row, col)
             self.cards.append(card)
 
-        self.status_lbl.setText(f"{len(videos)} videos encontrados en la carpeta.")
+        self.status_lbl.setText(f"{len(videos)} videos encontrados. Haz clic en cualquiera para probarlo en tu escritorio.")
 
-    def on_card_toggled(self, video_path: Path, is_checked: bool):
+    def on_card_single_clicked(self, video_path: Path):
+        """Al hacer clic en la tarjeta, se pone DE INMEDIATO en el escritorio como vista previa en vivo."""
+        self.active_selection = {video_path}
+        
+        # Desmarcamos las otras casillas y marcamos esta para reflejar que este es el activo
+        for card in self.cards:
+            card.check.blockSignals(True)
+            card.check.setChecked(card.video_path == video_path)
+            card.check.blockSignals(False)
+
+        launch_wallpaper_process([video_path])
+        self.status_lbl.setText(f"▶ Vista previa en vivo: {video_path.stem} (Presiona 'Confirmar Selección' para fijarlo)")
+
+    def on_card_checkbox_toggled(self, video_path: Path, is_checked: bool):
+        """Al marcar/desmarcar casillas para armar una lista múltiple."""
         if is_checked:
-            self.selected_videos.add(video_path)
+            self.active_selection.add(video_path)
         else:
-            self.selected_videos.discard(video_path)
+            self.active_selection.discard(video_path)
 
-        count = len(self.selected_videos)
+        count = len(self.active_selection)
         if count == 0:
+            kill_all_instances()
             self.status_lbl.setText("Ningún video seleccionado.")
         elif count == 1:
-            self.status_lbl.setText("1 video seleccionado (reproducción en bucle único).")
+            vid = list(self.active_selection)[0]
+            launch_wallpaper_process([vid])
+            self.status_lbl.setText(f"▶ Reproduciendo: {vid.stem} (Pulsa 'Confirmar Selección' para fijar)")
         else:
-            self.status_lbl.setText(f"{count} videos seleccionados (rotación continua y suave).")
+            sel_list = sorted(list(self.active_selection))
+            launch_wallpaper_process(sel_list)
+            self.status_lbl.setText(f"▶ {count} videos en rotación en vivo (Pulsa 'Confirmar Selección' para fijar)")
+
+    def confirm_and_save(self):
+        """Guarda la selección actual como definitiva."""
+        if not self.active_selection:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Sin selección",
+                "Por favor selecciona al menos un video antes de confirmar."
+            )
+            return
+
+        self.confirmed_videos = set(self.active_selection)
+        self.save_config()
+
+        count = len(self.confirmed_videos)
+        if count == 1:
+            msg = f"✓ ¡Fondo confirmado con éxito! ({list(self.confirmed_videos)[0].stem})"
+        else:
+            msg = f"✓ ¡Selección de {count} videos confirmada y fijada!"
+
+        self.status_lbl.setText(msg)
+        QtWidgets.QToolTip.showText(
+            self.btn_confirm.mapToGlobal(QtCore.QPoint(0, -30)),
+            msg,
+            self.btn_confirm
+        )
 
     def stop_wallpaper(self):
         kill_all_instances()
-        self.status_lbl.setText("Fondo animado detenido.")
-
-    def apply_wallpaper(self):
-        if not self.selected_videos:
-            self.status_lbl.setText("⚠ Por favor selecciona al menos 1 video antes de aplicar.")
-            return
-
+        self.active_selection.clear()
+        self.confirmed_videos.clear()
         self.save_config()
-        kill_all_instances()
-
-        selected_list = list(self.selected_videos)
-        selected_list.sort()
-
-        if len(selected_list) == 1:
-            vid = selected_list[0]
-            cmd = [
-                "mpvpaper",
-                "-o", "no-audio loop-file=inf",
-                "*",
-                str(vid),
-            ]
-            subprocess.Popen(cmd)
-            self.status_lbl.setText(f"✓ Aplicado: {vid.name}")
-        else:
-            playlist_path = Path("/tmp/cosmic_wallpaper_playlist.txt")
-            with open(playlist_path, "w", encoding="utf-8") as f:
-                for v in selected_list:
-                    f.write(f"{v}\n")
-
-            mpv_opts = "no-audio prefetch-playlist=yes keep-open=yes loop-playlist=inf"
-            cmd = [
-                "mpvpaper",
-                "-o", mpv_opts,
-                "*",
-                str(playlist_path),
-            ]
-            subprocess.Popen(cmd)
-            self.status_lbl.setText(f"✓ {len(selected_list)} videos aplicados en rotación suave.")
+        for card in self.cards:
+            card.check.blockSignals(True)
+            card.check.setChecked(False)
+            card.check.blockSignals(False)
+        self.status_lbl.setText("Fondo animado detenido.")
 
     def closeEvent(self, event):
         event.ignore()
