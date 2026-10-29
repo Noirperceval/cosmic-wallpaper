@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Cosmic Wallpaper
+Comment=Fondo animado interactivo para COSMIC Desktop
+Exec=cosmic-wallpaper
+Icon=io.github.Noirperceval.CosmicWallpaper
+Type=Application
+Terminal=false
+Categories=Utility;Settings;DesktopSettings;
+StartupNotify=true
+X-Flatpak=io.github.Noirperceval.CosmicWallpaper

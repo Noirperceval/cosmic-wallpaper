@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.Noirperceval.CosmicWallpaper</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Cosmic Wallpaper</name>
+  <summary>Fondo animado interactivo y de alto rendimiento para COSMIC Desktop</summary>
+  <description>
+    <p>
+      Cosmic Wallpaper es una aplicación gráfica para seleccionar, previsualizar en vivo
+      y configurar videos como fondos de pantalla animados en el escritorio COSMIC Desktop.
+    </p>
+    <p>
+      <b>Requisito del sistema:</b> Esta aplicación utiliza <code>mpvpaper</code> en el sistema
+      anfitrión para renderizar los videos sobre la superficie Wayland sin parpadeos. Si no lo tienes,
+      la aplicación incluye un asistente para ayudarte a instalarlo, o puedes utilizar nuestra
+      versión autónoma en AppImage disponible en GitHub.
+    </p>
+  </description>
+  <developer_name>Noir Perceval (Daniel Chable)</developer_name>
+  <url type="homepage">https://github.com/Noirperceval/cosmic-wallpaper</url>
+  <url type="bugtracker">https://github.com/Noirperceval/cosmic-wallpaper/issues</url>
+  <url type="help">https://github.com/Noirperceval/cosmic-wallpaper#readme</url>
+  <launchable type="desktop-id">io.github.Noirperceval.CosmicWallpaper.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Selector interactivo con vista de miniaturas</caption>
+      <image>https://raw.githubusercontent.com/Noirperceval/cosmic-wallpaper/main/docs/preview.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.1.0" date="2026-10-29">
+      <description>
+        <p>Versión inicial para Flathub con soporte para selección múltiple, vista previa en tiempo real y bandeja del sistema.</p>
+      </description>
+    </release>
+  </releases>
+</component>

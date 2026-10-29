@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="cosmicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a154b"/>
+      <stop offset="50%" stop-color="#191938"/>
+      <stop offset="100%" stop-color="#0e3854"/>
+    </linearGradient>
+    <linearGradient id="neonPlay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+  </defs>
+  <rect width="116" height="116" x="6" y="6" rx="26" fill="url(#cosmicGrad)" stroke="#4facfe" stroke-width="2"/>
+  <circle cx="95" cy="30" r="2.5" fill="#ffffff" opacity="0.8"/>
+  <circle cx="35" cy="92" r="2" fill="#ffffff" opacity="0.6"/>
+  <circle cx="102" cy="75" r="1.5" fill="#ffffff" opacity="0.7"/>
+  <circle cx="28" cy="38" r="1.8" fill="#ffffff" opacity="0.6"/>
+  <polygon points="50,42 90,64 50,86" fill="url(#neonPlay)"/>
+</svg>

@@ -1,0 +1,37 @@
+app-id: io.github.Noirperceval.CosmicWallpaper
+runtime: org.kde.Platform
+runtime-version: '6.7'
+sdk: org.kde.Sdk
+command: cosmic-wallpaper
+
+finish-args:
+  # Acceso a pantalla y servidor Wayland del escritorio COSMIC
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  # Acceso a sonido si se requiere en el futuro
+  - --socket=pulseaudio
+  # Acceso a las carpetas de videos del usuario
+  - --filesystem=xdg-videos
+  - --filesystem=home:ro
+  # Permiso para comunicarse con el sistema y lanzar mpvpaper si está en host
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.kde.StatusNotifierWatcher
+
+modules:
+  - name: cosmic-wallpaper
+    buildsystem: simple
+    build-commands:
+      - install -D cosmic_wallpaper_gui.py /app/bin/cosmic-wallpaper
+      - install -D io.github.Noirperceval.CosmicWallpaper.desktop /app/share/applications/io.github.Noirperceval.CosmicWallpaper.desktop
+      - install -D io.github.Noirperceval.CosmicWallpaper.svg /app/share/icons/hicolor/scalable/apps/io.github.Noirperceval.CosmicWallpaper.svg
+      - install -D io.github.Noirperceval.CosmicWallpaper.metainfo.xml /app/share/metainfo/io.github.Noirperceval.CosmicWallpaper.metainfo.xml
+    sources:
+      - type: file
+        path: cosmic_wallpaper_gui.py
+      - type: file
+        path: io.github.Noirperceval.CosmicWallpaper.desktop
+      - type: file
+        path: io.github.Noirperceval.CosmicWallpaper.svg
+      - type: file
+        path: io.github.Noirperceval.CosmicWallpaper.metainfo.xml
