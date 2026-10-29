@@ -7,6 +7,12 @@
 
 ---
 
+## 📸 Vista Previa
+
+![Cosmic Wallpaper en acción](docs/preview.png)
+
+---
+
 ## 📦 Métodos de Instalación
 
 Tienes dos opciones para disfrutar de Cosmic Wallpaper:
