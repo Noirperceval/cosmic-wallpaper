@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 *.AppImage
 AppDir/
+build/
+dist/
+*.spec
