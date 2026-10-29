@@ -54,6 +54,22 @@ Si utilizas el ecosistema Flatpak, el proyecto incluye el manifiesto oficial con
 
 ---
 
+## ⚙️ Instalación desde el código fuente (con autostart)
+
+Si clonaste el repositorio y quieres instalarlo correctamente con inicio automático al arrancar COSMIC:
+
+```bash
+git clone https://github.com/Noirperceval/cosmic-wallpaper.git
+cd cosmic-wallpaper
+./install.sh
+```
+
+El script `install.sh` se encarga de:
+- Crear el acceso directo en tu **menú de aplicaciones**.
+- Configurar el **inicio automático** con tu sesión de COSMIC Desktop (la app se carga en la bandeja del sistema al iniciar sesión y restaura tu último fondo confirmado automáticamente).
+
+---
+
 ## 💻 Construir el AppImage desde el código
 
 Si deseas generar el ejecutable AppImage por tu cuenta:
