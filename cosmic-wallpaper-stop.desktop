@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Detener Fondo Animado
+Comment=Cierra y detiene el fondo animado de Cosmic
+Exec=/home/chable/Laboratorio/Cosmic/cosmic-wallpaper/target/release/cosmic-wallpaper -k
+Icon=process-stop
+Type=Application
+Terminal=false
+Categories=Utility;Settings;DesktopSettings;

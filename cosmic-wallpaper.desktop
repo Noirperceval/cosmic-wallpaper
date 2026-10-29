@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Cosmic Wallpaper
+Comment=Fondo animado interactivo para COSMIC Desktop con vista en cuadrícula y bandeja
+Exec=/home/chable/Laboratorio/Cosmic/cosmic-wallpaper/cosmic_wallpaper_gui.py
+Icon=video-x-generic
+Type=Application
+Terminal=false
+Categories=Utility;Settings;DesktopSettings;
+StartupNotify=true
