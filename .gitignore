@@ -6,3 +6,9 @@ AppDir/
 build/
 dist/
 *.spec
+
+# Mockup local (usa miniaturas reales del usuario)
+docs/mockup-assets/
+
+# Artefacto de diseño local
+docs/redesign-mockup.html

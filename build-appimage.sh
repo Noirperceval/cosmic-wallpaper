@@ -5,7 +5,8 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DIR"
 
 echo "==> 1. Compilando binario autónomo..."
-pyinstaller --onefile --windowed --name cosmic-wallpaper cosmic_wallpaper_gui.py
+rm -rf build dist
+pyinstaller --clean --noconfirm --onefile --windowed --name cosmic-wallpaper cosmic_wallpaper_gui.py
 
 echo "==> 2. Preparando AppDir..."
 rm -rf AppDir
@@ -56,7 +57,9 @@ chmod +x AppDir/AppRun
 
 echo "==> 3. Empaquetando AppImage..."
 if [ ! -f appimagetool-x86_64.AppImage ]; then
-    curl -LO https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+    echo "==> Descargando appimagetool..."
+    curl -fL -o appimagetool-x86_64.AppImage \
+        https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
     chmod +x appimagetool-x86_64.AppImage
 fi
 

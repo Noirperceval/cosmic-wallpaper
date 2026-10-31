@@ -8,7 +8,12 @@
   <description>
     <p>
       Cosmic Wallpaper es una aplicación gráfica para seleccionar, previsualizar en vivo
-      y configurar videos como fondos de pantalla animados en el escritorio COSMIC Desktop.
+      y rotar videos como fondos de pantalla animados en COSMIC Desktop.
+    </p>
+    <p>
+      Incluye un búfer de doble capa: caché en RAM dentro de mpv para que el siguiente
+      video esté listo y un frame estático de respaldo en el escritorio para evitar
+      fondos negros entre transiciones.
     </p>
     <p>
       <b>Requisito del sistema:</b> Esta aplicación utiliza <code>mpvpaper</code> en el sistema
@@ -30,6 +35,14 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="2.0.0" date="2026-10-30">
+      <description>
+        <p>Rediseño monocromo con temas claro y oscuro, sidebar con rotación ordenable,
+        búfer de doble capa (caché de mpv + frame de respaldo con cosmic-bg),
+        rotación temporizada cada 35 s mediante IPC, vista de lista, buscador,
+        favoritos, pausa real y restauración del último fondo.</p>
+      </description>
+    </release>
     <release version="1.1.0" date="2026-10-29">
       <description>
         <p>Versión inicial para Flathub con soporte para selección múltiple, vista previa en tiempo real y bandeja del sistema.</p>

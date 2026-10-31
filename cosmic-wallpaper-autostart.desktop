@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=Cosmic Wallpaper
-Comment=Fondo animado para COSMIC Desktop — inicia con el sistema en bandeja
-Exec=/home/chable/Laboratorio/Cosmic/cosmic-wallpaper/cosmic_wallpaper_gui.py
+Comment=Fondo animado para COSMIC Desktop — inicia con el sistema en la bandeja
+Exec=cosmic-wallpaper
 Icon=io.github.Noirperceval.CosmicWallpaper
 Hidden=false
 NoDisplay=false
