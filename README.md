@@ -15,7 +15,7 @@
   <sub>AppImage autónomo (incluye Python y Qt) · Arch, CachyOS, Fedora, Ubuntu, Debian, Pop!_OS</sub>
 </p>
 
-**Versión 2.0.1** · **Creado por:** [Noir Perceval (Daniel Chable)](https://github.com/Noirperceval)
+**Versión 2.0.2** · **Creado por:** [Noir Perceval (Daniel Chable)](https://github.com/Noirperceval)
 **Repositorio:** [https://github.com/Noirperceval/cosmic-wallpaper](https://github.com/Noirperceval/cosmic-wallpaper)
 
 ---
@@ -35,6 +35,7 @@
 - **Búfer de doble capa** para que nunca aparezca un fondo negro o estático entre videos.
 - **Selección múltiple explícita**: casillas por video, orden de turnos y confirmación persistente.
 - **Rotación temporizada**: cambia de video cada 35 s (configurable) o al terminar cada uno, usando IPC de mpv sin reiniciar el reproductor.
+- **Ajuste de video**: rellenar (recortar), ajustar (barras) o estirar, para videos cuya proporción no coincide con la pantalla.
 - **Vista de cuadrícula o lista**, buscador y filtros por favoritos y recientes.
 - **Pausa / reanudación real** y **apagado limpio** (sin dejar procesos huérfanos).
 - **Restauración automática** de tu último fondo confirmado al iniciar sesión.
@@ -129,6 +130,18 @@ usar el AppImage.
   `mpvpaper`: no hay recarga ni pérdida del búfer.
 - El pie muestra `cambia en mm:ss` con una barra de progreso, y la bandeja del
   sistema tiene **Siguiente video** para forzar el cambio al instante.
+
+### Ajuste del video
+
+No todos los videos tienen la proporción de tu pantalla. Por ejemplo, un video
+**3440×1440 (21:9)** en una pantalla **1920×1080 (16:9)** no puede llenar todo
+sin recortar o deformar. En **Ajustes → Ajuste del video** puedes elegir:
+
+- **Rellenar** (predeterminado): llena la pantalla recortando los bordes sobrantes.
+- **Ajustar**: muestra el video completo, con barras arriba y abajo.
+- **Estirar**: llena la pantalla deformando la imagen (no recomendado).
+
+El cambio se aplica al instante mediante IPC, sin reiniciar el fondo.
 
 ### Línea de comandos
 

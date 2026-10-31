@@ -35,6 +35,12 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="2.0.2" date="2026-10-30">
+      <description>
+        <p>Ajuste de video configurable: rellenar (recortar), ajustar (barras) o estirar,
+        aplicable en vivo. Pensado para videos con una proporción distinta a la pantalla.</p>
+      </description>
+    </release>
     <release version="2.0.1" date="2026-10-30">
       <description>
         <p>Botón de descarga directa del AppImage en el README. Sin cambios funcionales.</p>

@@ -29,7 +29,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtSvg, QtWidgets
 
 APP_NAME = "Cosmic Wallpaper"
-VERSION = "2.0.1"
+VERSION = "2.0.2"
 AUTHOR_NAME = "Noir Perceval (Daniel Chable)"
 GITHUB_URL = "https://github.com/Noirperceval"
 
@@ -648,6 +648,7 @@ class WallpaperEngine(QtCore.QObject):
         self.playlist: list[Path] = []
         self.index = 0
         self.paused = False
+        self.scaling = "fill"
         self.mpvpaper = shutil.which("mpvpaper")
         self._watch = QtCore.QTimer(self)
         self._watch.setInterval(2000)
@@ -688,6 +689,12 @@ class WallpaperEngine(QtCore.QObject):
             "demuxer-max-bytes=768MiB demuxer-readahead-secs=60 prefetch-playlist=yes "
             f"input-ipc-server={IPC_PATH}"
         )
+        if self.scaling == "stretch":
+            options += " keepaspect=no panscan=0"
+        elif self.scaling == "fit":
+            options += " keepaspect=yes panscan=0"
+        else:
+            options += " keepaspect=yes panscan=1.0"
         if len(videos) == 1:
             cmd = [self.mpvpaper, "-o", options, "*", str(videos[0])]
         else:
@@ -763,6 +770,28 @@ class WallpaperEngine(QtCore.QObject):
         if isinstance(position, int) and position >= 0:
             return position
         return None
+
+    def set_scaling(self, mode: str) -> bool:
+        """Ajusta cómo llena el video la pantalla (en vivo, sin reiniciar)."""
+        if mode not in ("fill", "fit", "stretch"):
+            mode = "fill"
+        self.scaling = mode
+        if not self.running():
+            return True
+
+        def ok(response) -> bool:
+            return bool(response and response.get("error") == "success")
+
+        if mode == "stretch":
+            first = self._ipc(["set_property", "keepaspect", False])
+            second = self._ipc(["set_property", "panscan", 0.0])
+        elif mode == "fit":
+            first = self._ipc(["set_property", "keepaspect", True])
+            second = self._ipc(["set_property", "panscan", 0.0])
+        else:
+            first = self._ipc(["set_property", "keepaspect", True])
+            second = self._ipc(["set_property", "panscan", 1.0])
+        return ok(first) and ok(second)
 
     def stop(self, restore_background: bool = True):
         self._kill()
@@ -1574,6 +1603,9 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
         except (TypeError, ValueError):
             self.rotation_seconds = 35
         self.rotation_seconds = max(5, min(3600, self.rotation_seconds))
+        self.scaling = self.config.get("scaling", "fill")
+        if self.scaling not in ("fill", "fit", "stretch"):
+            self.scaling = "fill"
         self._rotate_due = 0.0
         self._restore = restore and self.config.get("restore", True)
         self._cols = 0
@@ -1632,6 +1664,7 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
             "view": self.mode,
             "rotation_mode": self.rotation_mode,
             "rotation_seconds": self.rotation_seconds,
+            "scaling": self.scaling,
             "restore": self.config.get("restore", True),
         })
         try:
@@ -2050,6 +2083,18 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
             action.triggered.connect(
                 lambda checked=False, value=seconds: self.set_rotation(value))
 
+        scaling_menu = menu.addMenu("Ajuste del video")
+        for key, label in (
+            ("fill", "Rellenar (recortar bordes)"),
+            ("fit", "Ajustar (barras)"),
+            ("stretch", "Estirar (deformar)"),
+        ):
+            action = scaling_menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(self.scaling == key)
+            action.triggered.connect(
+                lambda checked=False, mode=key: self.set_scaling(mode))
+
         menu.addSeparator()
         act_restore = menu.addAction("Restaurar último fondo al iniciar")
         act_restore.setCheckable(True)
@@ -2258,6 +2303,7 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
     # -- selección y reproducción ---------------------------------------
     def launch(self, videos, start_index: int = 0) -> bool:
         videos = [Path(v) for v in videos]
+        self.engine.scaling = self.scaling
         ok = self.engine.start(videos, start_index)
         if ok:
             self.engine.index = max(0, min(start_index, len(videos) - 1))
@@ -2416,6 +2462,23 @@ class CosmicWallpaperApp(QtWidgets.QMainWindow):
         )
         if accepted:
             self.set_rotation(value)
+
+    def set_scaling(self, mode: str):
+        if mode not in ("fill", "fit", "stretch"):
+            mode = "fill"
+        self.scaling = mode
+        applied = self.engine.set_scaling(mode)
+        self.save_config()
+        labels = {
+            "fill": "rellenar y recortar los bordes",
+            "fit": "ajustar con barras",
+            "stretch": "estirar la imagen",
+        }
+        if applied and self.engine.running():
+            self.status_sub.setText(f"Ajuste del video: {labels[mode]}.")
+        else:
+            self.status_sub.setText(
+                f"Ajuste del video: {labels[mode]} · se aplicará al próximo video.")
 
     def confirm_selection(self):
         if not self.selection and self.live is not None:
