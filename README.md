@@ -7,7 +7,7 @@
     <img src="https://img.shields.io/badge/Descargar_AppImage-111111?style=for-the-badge&logo=linux&logoColor=white" alt="Descargar AppImage">
   </a>
   <a href="https://github.com/Noirperceval/cosmic-wallpaper/releases">
-    <img src="https://img.shields.io/badge/Releases-v2.0.1-111111?style=for-the-badge" alt="Releases">
+    <img src="https://img.shields.io/github/v/release/Noirperceval/cosmic-wallpaper?style=for-the-badge&label=Releases&color=111111" alt="Releases">
   </a>
 </p>
 
