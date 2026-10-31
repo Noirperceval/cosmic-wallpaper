@@ -2,7 +2,20 @@
 
 > Fondo animado para **COSMIC Desktop** con rotación de videos, búfer sin cortes y una interfaz monocroma que respeta el escritorio.
 
-**Versión 2.0** · **Creado por:** [Noir Perceval (Daniel Chable)](https://github.com/Noirperceval)
+<p align="center">
+  <a href="https://github.com/Noirperceval/cosmic-wallpaper/releases/latest/download/Cosmic-Wallpaper-x86_64.AppImage">
+    <img src="https://img.shields.io/badge/Descargar_AppImage-111111?style=for-the-badge&logo=linux&logoColor=white" alt="Descargar AppImage">
+  </a>
+  <a href="https://github.com/Noirperceval/cosmic-wallpaper/releases">
+    <img src="https://img.shields.io/badge/Releases-v2.0.1-111111?style=for-the-badge" alt="Releases">
+  </a>
+</p>
+
+<p align="center">
+  <sub>AppImage autónomo (incluye Python y Qt) · Arch, CachyOS, Fedora, Ubuntu, Debian, Pop!_OS</sub>
+</p>
+
+**Versión 2.0.1** · **Creado por:** [Noir Perceval (Daniel Chable)](https://github.com/Noirperceval)
 **Repositorio:** [https://github.com/Noirperceval/cosmic-wallpaper](https://github.com/Noirperceval/cosmic-wallpaper)
 
 ---

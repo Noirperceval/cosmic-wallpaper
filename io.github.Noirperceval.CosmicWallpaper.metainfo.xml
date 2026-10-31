@@ -35,6 +35,11 @@
   </screenshots>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="2.0.1" date="2026-10-30">
+      <description>
+        <p>Botón de descarga directa del AppImage en el README. Sin cambios funcionales.</p>
+      </description>
+    </release>
     <release version="2.0.0" date="2026-10-30">
       <description>
         <p>Rediseño monocromo con temas claro y oscuro, sidebar con rotación ordenable,

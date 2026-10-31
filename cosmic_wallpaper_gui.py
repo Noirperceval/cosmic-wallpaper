@@ -29,7 +29,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtGui, QtSvg, QtWidgets
 
 APP_NAME = "Cosmic Wallpaper"
-VERSION = "2.0.0"
+VERSION = "2.0.1"
 AUTHOR_NAME = "Noir Perceval (Daniel Chable)"
 GITHUB_URL = "https://github.com/Noirperceval"
 
