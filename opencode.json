@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["LEE_HISTORIAL.md"],
+  "commands": {
+    "historial": {
+      "description": "Actualiza el historial del proyecto con lo hecho en esta sesión",
+      "template": "Lee LEE_HISTORIAL.md completo. Después actualízalo con lo que hicimos en esta sesión: estado actual (versión, rama, enlaces, hashes), pendientes marcados y una entrada nueva en la bitácora con la fecha y un resumen de 3 a 6 puntos. No borres historia anterior. Al final, muéstrame un resumen breve de lo que cambió en el archivo."
+    }
+  }
+}

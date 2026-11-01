@@ -11,3 +11,19 @@ docs/mockup-assets/
 
 # Artefacto de diseño local
 docs/redesign-mockup.html
+
+# Secretos y credenciales
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+secrets.json
+credentials.json
+
+# Respaldos locales
+*.bak
+*.backup
+*.orig
+*~
